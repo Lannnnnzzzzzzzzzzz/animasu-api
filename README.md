@@ -69,10 +69,10 @@ Contoh dibawah menggunakan <a href="https://developer.mozilla.org/en-US/docs/Web
 
 ### API Entries
 
-`http://localhost:5000/api/v1`
+`http://localhost:5000/anime/animasu`
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1');
+const response = await fetch('http://localhost:5000/anime/animasu');
 const data = await response.json();
 console.log(data);
 ```
@@ -83,14 +83,14 @@ Output dibawah adalah Endpoints yang bisa anda gunakan saat ini
   "message": "API Entries",
   "entries": [
     {
-      "Search": "/api/v1/search/:keyword/:page",
-      "Ongoing Series": "/api/v1/ongoing-series/:page",
-      "Anime Details": "/api/v1/anime/:slug",
-      "Anime Episode": "/api/v1/episode/:slug",
-      "Genre": "/api/v1/genre/:slug/:page",
-      "Character Type": "/api/v1/character-type/:slug/:page",
-      "Filter List": "/api/v1/filter-list/:query/:page",
-      "Movies": "/api/v1/movies/:page"
+      "Search": "/anime/animasu/search/:keyword/:page",
+      "Ongoing Series": "/anime/animasu/ongoing-series/:page",
+      "Anime Details": "/anime/animasu/anime/:slug",
+      "Anime Episode": "/anime/animasu/episode/:slug",
+      "Genre": "/anime/animasu/genre/:slug/:page",
+      "Character Type": "/anime/animasu/character-type/:slug/:page",
+      "Filter List": "/anime/animasu/filter-list/:query/:page",
+      "Movies": "/anime/animasu/movies/:page"
     }
   ]
 }
@@ -100,10 +100,10 @@ Output dibawah adalah Endpoints yang bisa anda gunakan saat ini
 
 ### Search
 
-`http://localhost:5000/api/v1/:keyword/:page`
+`http://localhost:5000/anime/animasu/:keyword/:page`
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/search/dragon ball/1');
+const response = await fetch('http://localhost:5000/anime/animasu/search/dragon ball/1');
 const data = await response.json();
 console.log(data);
 ```
@@ -138,10 +138,10 @@ Output:
 
 ### Ongoing Series
 
-`http://localhost:5000/api/v1/ongoing-series/:page`
+`http://localhost:5000/anime/animasu/ongoing-series/:page`
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/ongoing-series/1');
+const response = await fetch('http://localhost:5000/anime/animasu/ongoing-series/1');
 const data = await response.json();
 console.log(data);
 ```
@@ -180,11 +180,11 @@ Output:
 
 ### Anime Details
 
-`http://localhost:5000/api/v1/anime/:slug`
+`http://localhost:5000/anime/animasu/anime/:slug`
 
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/anime/super-dragon-ball-heroes-indo');
+const response = await fetch('http://localhost:5000/anime/animasu/anime/super-dragon-ball-heroes-indo');
 const data = await response.json();
 console.log(data);
 ```
@@ -253,10 +253,10 @@ Output:
 
 ### Anime Episode
 
-`http://localhost:5000/api/v1/episode/:slug`
+`http://localhost:5000/anime/animasu/episode/:slug`
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/episode/nonton-super-dragon-ball-heroes-episode-50');
+const response = await fetch('http://localhost:5000/anime/animasu/episode/nonton-super-dragon-ball-heroes-episode-50');
 const data = await response.json();
 console.log(data);
 // kalau movie langsung slug nya saja
@@ -265,63 +265,38 @@ console.log(data);
 Output:
 
 ```json
-[
-  {
-    "title": "Nonton Super Dragon Ball Heroes Episode 50 Sub Indo",
-    "name": "Super Dragon Ball Heroes",
-    "status": "Sedang Tayang 🔥",
-    "slug": "super-dragon-ball-heroes-indo",
-    "img": "https://cdn.myanimelist.net/images/anime/1480/92990.jpg",
-    "iframes": [
-      {
-        "label": "480p [1]",
-        "src": "https://new.uservideo.xyz/file/zoronime-sdbh-50-480p-mp4/?embed=true&autoplay=true"
-      },
-      {
-        "label": "480p [2]",
-        "src": "https://www.blogger.com/video.g?token=AD6v5dwzxEMwqmwBHzqstPJqQWAu4AHDgMCANsJhrBoO7KFjBcMOVwkuJEwuhL-HleCejGIDBtMX2wbE03nfBo1VxcIBHooU1eBJ7xnrtObjaXE5aBj6LJqmX10UBJmYCDljOxp24Hho"
-      },
-      {
-        "label": "1080p [1]",
-        "src": "https://mega.nz/embed/SiJSkQLT#M9g8eiq67efd01HvoJxmBXx4h6CqMLGTSLtSicrwakI"
-      },
-      {
-        "label": "1080p [2]",
-        "src": "https://wibufile.com/embed/hOhYOpHQsRkgh8z"
-      },
-      {
-        "label": "1080p [3]",
-        "src": "https://krakenfiles.com/embed-video/hgKn4Ey0MR"
-      }
-    ],
-    "episodes": [
-      {
-        "episode": "Episode 50",
-        "slug": "nonton-super-dragon-ball-heroes-episode-50"
-      },
-      {
-        "episode": "Episode 49",
-        "slug": "nonton-super-dragon-ball-heroes-episode-49"
-      },
-      {
-        "episode": "Episode 48",
-        "slug": "nonton-super-dragon-ball-heroes-episode-48"
-      },
-      {...}
-    ]
-  }
-]
+{
+  "status": "success",
+  "creator": "Animasu API",
+  "source": "Animasu",
+  "title": "Nonton Super Dragon Ball Heroes Episode 50 Sub Indo",
+  "streams": [
+    {
+      "name": "480p [1]",
+      "url": "https://new.uservideo.xyz/file/zoronime-sdbh-50-480p-mp4/?embed=true&autoplay=true"
+    },
+    {
+      "name": "480p [2]",
+      "url": "https://www.blogger.com/video.g?token=..."
+    },
+    {
+      "name": "1080p [1]",
+      "url": "https://mega.nz/embed/..."
+    }
+  ],
+  "downloads": []
+}
 ```
 
 ***
 
 ### Genre
 
-`http://localhost:5000/api/v1/genre/:slug/:page`
+`http://localhost:5000/anime/animasu/genre/:slug/:page`
 
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/genre/aksi/1');
+const response = await fetch('http://localhost:5000/anime/animasu/genre/aksi/1');
 const data = await response.json();
 console.log(data);
 ```
@@ -357,10 +332,10 @@ Ouput:
 
 ### Character Type
 
-`http://localhost:5000/api/v1/character-type/:slug/:page`
+`http://localhost:5000/anime/animasu/character-type/:slug/:page`
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/character-type/cerewet/1');
+const response = await fetch('http://localhost:5000/anime/animasu/character-type/cerewet/1');
 const data = await response.json();
 console.log(data);
 ```
@@ -396,10 +371,10 @@ Output:
 
 ### Filter List
 
-`http://localhost:5000/api/v1/filter-list/:query/:page`
+`http://localhost:5000/anime/animasu/filter-list/:query/:page`
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/filter-list/genre[]=aksi&karakter[]=overpower/1');
+const response = await fetch('http://localhost:5000/anime/animasu/filter-list/genre[]=aksi&karakter[]=overpower/1');
 const data = await response.json();
 console.log(data);
 ```
@@ -439,20 +414,20 @@ Format Query Genre `genre[]=<slug>`
 
 Query dipisahkan dengan tanda "&", contoh jika ingin mencari anime dengan tipe karakter Overpower dan Jenius
 
-`http://localhost:5000/api/v1/filter-list/karakter[]=overpower&karakter[]=jenius/:page`
+`http://localhost:5000/anime/animasu/filter-list/karakter[]=overpower&karakter[]=jenius/:page`
 
 Jika ingin menambahkan berbagai genre tinggal gabungkan seperti diatas (urutan tidak berpengaruh)
 
-`http://localhost:5000/api/v1/filter-list/karakter[]=overpower&karakter[]=jenius&genre[]=aksi&genre[]=sekolahan/:page`
+`http://localhost:5000/anime/animasu/filter-list/karakter[]=overpower&karakter[]=jenius&genre[]=aksi&genre[]=sekolahan/:page`
 
 ***
 
 ### Movies
 
-`http://localhost:5000/api/v1/movies/:page`
+`http://localhost:5000/anime/animasu/movies/:page`
 
 ```js
-const response = await fetch('http://localhost:5000/api/v1/movies/1');
+const response = await fetch('http://localhost:5000/anime/animasu/movies/1');
 const data = await response.json();
 console.log(data);
 ```
@@ -615,3 +590,4 @@ Abizar Reyfan
 Silakan Berikan ⭐ repositori ini jika Anda menyukainya atau project ini membantu Anda!
 
 Copyright © 2024 <a href="https://abizar.vercel.app" title="https://abizar.vercel.app">Abizar Reyfan</a>.
+
