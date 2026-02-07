@@ -6,6 +6,15 @@ const { getCards, getPaginationButton, getPaginationCount } = require('./helpers
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Fetch options to avoid being blocked
+const fetchOptions = {
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+  }
+};
+
 const getCache = (key) => {
   const item = cache.get(key);
   if (!item) return null;
@@ -29,7 +38,7 @@ const ongoingSeries = async (page) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/sedang-tayang/?halaman=${page}`);
+    const res = await fetch(`${url.BASE_URL}/sedang-tayang/?halaman=${page}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     const data = {
@@ -54,7 +63,7 @@ const animeDetails = async (slug) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/anime/${slug}`);
+    const res = await fetch(`${url.BASE_URL}/anime/${slug}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     const data = [];
@@ -123,7 +132,7 @@ const animeEpisode = async (slug) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/${slug}`);
+    const res = await fetch(`${url.BASE_URL}/${slug}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     
@@ -174,7 +183,7 @@ const search = async (keyword, page) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/page/${page}/?s=${keyword}`);
+    const res = await fetch(`${url.BASE_URL}/page/${page}/?s=${keyword}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     const data = {
@@ -199,7 +208,7 @@ const genre = async (slug, page) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/genre/${slug}/page/${page}`);
+    const res = await fetch(`${url.BASE_URL}/genre/${slug}/page/${page}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     const data = {
@@ -224,7 +233,7 @@ const characterType = async (slug, page) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/karakter/${slug}/page/${page}`);
+    const res = await fetch(`${url.BASE_URL}/karakter/${slug}/page/${page}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     const data = {
@@ -249,7 +258,7 @@ const movies = async (page) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/movie/?halaman=${page}`);
+    const res = await fetch(`${url.BASE_URL}/movie/?halaman=${page}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     const data = {
@@ -273,7 +282,7 @@ const filterList = async (query, page) => {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${url.BASE_URL}/pencarian/?halaman=${page}&${query}`);
+    const res = await fetch(`${url.BASE_URL}/pencarian/?halaman=${page}&${query}`, fetchOptions);
     const body = await res.text();
     const $ = cheerio.load(body);
     const data = {
