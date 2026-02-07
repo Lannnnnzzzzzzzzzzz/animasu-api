@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animasu API Documentation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: #a0a0a0;
+      margin-top: 10px;
+    }
+
+    .base-url-container {
+      background: rgba(255,255,255,0.05);
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .base-url-container label {
+      font-weight: 600;
+      color: #e94560;
+    }
+
+    .base-url-container input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .endpoints {
+      display: grid;
+      gap: 20px;
+    }
+
+    .endpoint-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .endpoint-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+    }
+
+    .endpoint-header {
+      background: rgba(233, 69, 96, 0.2);
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+    }
+
+    .method {
+      background: #4caf50;
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .endpoint-path {
+      font-family: 'Consolas', monospace;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .endpoint-desc {
+      color: #a0a0a0;
+      margin-left: auto;
+      font-size: 13px;
+    }
+
+    .endpoint-body {
+      padding: 20px;
+      display: none;
+    }
+
+    .endpoint-body.active {
+      display: block;
+    }
+
+    .params-container {
+      margin-bottom: 20px;
+    }
+
+    .params-container h4 {
+      color: #e94560;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .param-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .param-row label {
+      min-width: 100px;
+      color: #a0a0a0;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+    }
+
+    .param-row input {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .param-row input::placeholder {
+      color: #666;
+    }
+
+    .btn-fetch {
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s, opacity 0.2s;
+      font-size: 14px;
+    }
+
+    .btn-fetch:hover {
+      transform: scale(1.02);
+      opacity: 0.9;
+    }
+
+    .btn-fetch:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result-container {
+      margin-top: 20px;
+    }
+
+    .result-container h4 {
+      color: #4caf50;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .result-url {
+      background: rgba(0,0,0,0.3);
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      color: #ffc107;
+      margin-bottom: 10px;
+      word-break: break-all;
+    }
+
+    .result-box {
+      background: #0d1117;
+      border-radius: 10px;
+      padding: 15px;
+      max-height: 400px;
+      overflow: auto;
+    }
+
+    .result-box pre {
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      color: #c9d1d9;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #e94560;
+    }
+
+    .error {
+      color: #f44336;
+      padding: 15px;
+      background: rgba(244, 67, 54, 0.1);
+      border-radius: 5px;
+    }
+
+    .toggle-icon {
+      margin-left: 10px;
+      transition: transform 0.3s;
+    }
+
+    .endpoint-header.expanded .toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e94560;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .endpoint-desc {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎬 Animasu API</h1>
+      <p>Unofficial API untuk data Anime dari Animasu dengan Subtitle Indonesia</p>
+    </header>
+
+    <div class="base-url-container">
+      <label>Base URL:</label>
+      <input type="text" id="baseUrl" value="http://localhost:5000" placeholder="http://localhost:5000">
+    </div>
+
+    <div class="endpoints">
+      <!-- Search -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/search/:keyword/:page</span>
+          <span class="endpoint-desc">Cari anime berdasarkan keyword</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>keyword:</label>
+              <input type="text" id="search-keyword" placeholder="naruto">
+            </div>
+            <div class="param-row">
+              <label>page:</label>
+              <input type="number" id="search-page" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchSearch()">Fetch Data</button>
+          <div class="result-container" id="search-result"></div>
+        </div>
+      </div>
+
+      <!-- Ongoing Series -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/ongoing-series/:page</span>
+          <span class="endpoint-desc">Daftar anime yang sedang tayang</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>page:</label>
+              <input type="number" id="ongoing-page" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchOngoing()">Fetch Data</button>
+          <div class="result-container" id="ongoing-result"></div>
+        </div>
+      </div>
+
+      <!-- Anime Details -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/anime/:slug</span>
+          <span class="endpoint-desc">Detail lengkap anime</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>slug:</label>
+              <input type="text" id="anime-slug" placeholder="one-piece">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchAnime()">Fetch Data</button>
+          <div class="result-container" id="anime-result"></div>
+        </div>
+      </div>
+
+      <!-- Episode -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/episode/:slug</span>
+          <span class="endpoint-desc">Detail episode & link streaming</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>slug:</label>
+              <input type="text" id="episode-slug" placeholder="one-piece-episode-1">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchEpisode()">Fetch Data</button>
+          <div class="result-container" id="episode-result"></div>
+        </div>
+      </div>
+
+      <!-- Genre -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/genre/:slug/:page</span>
+          <span class="endpoint-desc">Filter anime berdasarkan genre</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>slug:</label>
+              <input type="text" id="genre-slug" placeholder="action">
+            </div>
+            <div class="param-row">
+              <label>page:</label>
+              <input type="number" id="genre-page" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchGenre()">Fetch Data</button>
+          <div class="result-container" id="genre-result"></div>
+        </div>
+      </div>
+
+      <!-- Character Type -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/character-type/:slug/:page</span>
+          <span class="endpoint-desc">Filter berdasarkan tipe karakter</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>slug:</label>
+              <input type="text" id="character-slug" placeholder="robot">
+            </div>
+            <div class="param-row">
+              <label>page:</label>
+              <input type="number" id="character-page" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchCharacter()">Fetch Data</button>
+          <div class="result-container" id="character-result"></div>
+        </div>
+      </div>
+
+      <!-- Movies -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/movies/:page</span>
+          <span class="endpoint-desc">Daftar anime movies</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>page:</label>
+              <input type="number" id="movies-page" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchMovies()">Fetch Data</button>
+          <div class="result-container" id="movies-result"></div>
+        </div>
+      </div>
+
+      <!-- Filter List -->
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="method">GET</span>
+          <span class="endpoint-path">/filter-list/:query/:page</span>
+          <span class="endpoint-desc">Filter dengan query custom</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="params-container">
+            <h4>Parameters</h4>
+            <div class="param-row">
+              <label>query:</label>
+              <input type="text" id="filter-query" placeholder="status=ongoing&type=tv">
+            </div>
+            <div class="param-row">
+              <label>page:</label>
+              <input type="number" id="filter-page" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn-fetch" onclick="fetchFilter()">Fetch Data</button>
+          <div class="result-container" id="filter-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getBaseUrl() {
+      return document.getElementById('baseUrl').value.replace(/\/$/, '') + '/anime/animasu';
+    }
+
+    function toggleEndpoint(header) {
+      const body = header.nextElementSibling;
+      const isActive = body.classList.contains('active');
+      
+      // Close all
+      document.querySelectorAll('.endpoint-body').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.endpoint-header').forEach(h => h.classList.remove('expanded'));
+      
+      // Toggle current
+      if (!isActive) {
+        body.classList.add('active');
+        header.classList.add('expanded');
+      }
+    }
+
+    function showLoading(containerId) {
+      document.getElementById(containerId).innerHTML = '<div class="loading">⏳ Loading...</div>';
+    }
+
+    function showResult(containerId, url, data) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = `
+        <h4>Response</h4>
+        <div class="result-url">GET ${url}</div>
+        <div class="result-box">
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        </div>
+      `;
+    }
+
+    function showError(containerId, url, error) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = `
+        <h4>Response</h4>
+        <div class="result-url">GET ${url}</div>
+        <div class="error">❌ Error: ${error}</div>
+      `;
+    }
+
+    async function fetchData(url, containerId) {
+      showLoading(containerId);
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          data = { raw: text };
+        }
+        showResult(containerId, url, data);
+      } catch (error) {
+        showError(containerId, url, error.message);
+      }
+    }
+
+    function fetchSearch() {
+      const keyword = document.getElementById('search-keyword').value || 'naruto';
+      const page = document.getElementById('search-page').value || 1;
+      const url = `${getBaseUrl()}/search/${encodeURIComponent(keyword)}/${page}`;
+      fetchData(url, 'search-result');
+    }
+
+    function fetchOngoing() {
+      const page = document.getElementById('ongoing-page').value || 1;
+      const url = `${getBaseUrl()}/ongoing-series/${page}`;
+      fetchData(url, 'ongoing-result');
+    }
+
+    function fetchAnime() {
+      const slug = document.getElementById('anime-slug').value || 'one-piece';
+      const url = `${getBaseUrl()}/anime/${encodeURIComponent(slug)}`;
+      fetchData(url, 'anime-result');
+    }
+
+    function fetchEpisode() {
+      const slug = document.getElementById('episode-slug').value || 'one-piece-episode-1';
+      const url = `${getBaseUrl()}/episode/${encodeURIComponent(slug)}`;
+      fetchData(url, 'episode-result');
+    }
+
+    function fetchGenre() {
+      const slug = document.getElementById('genre-slug').value || 'action';
+      const page = document.getElementById('genre-page').value || 1;
+      const url = `${getBaseUrl()}/genre/${encodeURIComponent(slug)}/${page}`;
+      fetchData(url, 'genre-result');
+    }
+
+    function fetchCharacter() {
+      const slug = document.getElementById('character-slug').value || 'robot';
+      const page = document.getElementById('character-page').value || 1;
+      const url = `${getBaseUrl()}/character-type/${encodeURIComponent(slug)}/${page}`;
+      fetchData(url, 'character-result');
+    }
+
+    function fetchMovies() {
+      const page = document.getElementById('movies-page').value || 1;
+      const url = `${getBaseUrl()}/movies/${page}`;
+      fetchData(url, 'movies-result');
+    }
+
+    function fetchFilter() {
+      const query = document.getElementById('filter-query').value || 'status=ongoing';
+      const page = document.getElementById('filter-page').value || 1;
+      const url = `${getBaseUrl()}/filter-list/${encodeURIComponent(query)}/${page}`;
+      fetchData(url, 'filter-result');
+    }
+  </script>
+</body>
+</html>

@@ -1,8 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const middlewares = require('./middlewares/index').middleware;
 const api = require('./api');
@@ -10,18 +12,22 @@ const api = require('./api');
 const app = express();
 
 app.use(morgan('dev'));
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Hak Cipta © 2024 Abizar Reyfan, Beralih ke /api/v1 untuk Entry Points'
-  });
+  res.redirect('/docs');
 });
 
-app.use('/api/v1', api);
+app.get('/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, '../docs.html'));
+});
+
+app.use('/anime/animasu', api);
 
 app.use(middlewares);
 

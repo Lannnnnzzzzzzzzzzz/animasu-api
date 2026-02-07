@@ -2,7 +2,32 @@ const cheerio = require('cheerio');
 const url = require('./urls');
 const { getCards, getPaginationButton, getPaginationCount } = require('./helpers');
 
+// Simple in-memory cache with TTL (5 minutes)
+const cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const getCache = (key) => {
+  const item = cache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiry) {
+    cache.delete(key);
+    return null;
+  }
+  return item.data;
+};
+
+const setCache = (key, data) => {
+  cache.set(key, {
+    data,
+    expiry: Date.now() + CACHE_TTL
+  });
+};
+
 const ongoingSeries = async (page) => {
+  const cacheKey = `ongoing_${page}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/sedang-tayang/?halaman=${page}`);
     const body = await res.text();
@@ -15,6 +40,7 @@ const ongoingSeries = async (page) => {
     data.anime = getCards($);
     data.pagination = getPaginationButton($);
 
+    setCache(cacheKey, data);
     return data;
   } catch (error) {
     console.log("🚀 ~ ongoingSeries ~ error:", error)
@@ -23,6 +49,10 @@ const ongoingSeries = async (page) => {
 };
 
 const animeDetails = async (slug) => {
+  const cacheKey = `anime_${slug}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/anime/${slug}`);
     const body = await res.text();
@@ -79,6 +109,7 @@ const animeDetails = async (slug) => {
       })
     })
   
+    setCache(cacheKey, data);
     return data;
   } catch (error) {
     console.log("🚀 ~ animeDetails ~ error:", error)
@@ -87,21 +118,22 @@ const animeDetails = async (slug) => {
 }
 
 const animeEpisode = async (slug) => {
+  const cacheKey = `episode_${slug}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/${slug}`);
     const body = await res.text();
     const $ = cheerio.load(body);
-    const data = [];
     
+    let title = null;
+    const streams = [];
+    const downloads = [];
+
     $('div.postbody article').each((index, element) => {
       const el = $(element);
-      const img = el.find('div.meta div.tb img').attr('data-src');
-      const title = el.find('div.meta div.lm h1').text().trim();
-      const name = el.find('div.meta div.lm span.epx a:first-child').text().trim();
-      const slug = el.find('div.meta div.lm span.epx a:first-child').attr('href').split('/')[4];
-      const status = el.find('div.releases h3 font').text().trim();
-
-      const iframes = [];
+      title = el.find('div.meta div.lm h1').text().trim() || null;
 
       el.find('select.mirror option').each((index, element) => {
         const option = $(element);
@@ -113,33 +145,23 @@ const animeEpisode = async (slug) => {
         const label = option.text().trim() || null;
         if(!src) return;
 
-        iframes.push({
-          label: label,
-          src: src,
+        streams.push({
+          name: label,
+          url: src,
         })
-      })
-
-      const episodes = [];
-      
-      el.find('div.bixbox ul#daftarepisode li').each((index, element) => {
-        episodes.push({
-          episode: $(element).find('span.lchx a').text().trim(),
-          slug: $(element).find('span.lchx a').attr('href').split('/')[3],
-        })
-      })
-  
-      data.push({
-        title: title || null,
-        name: name || null,
-        status: status || null,
-        slug: slug || null,
-        img: img || null,
-        iframes: iframes || null,
-        episodes: episodes || null
       })
     })
-  
-    return data;
+
+    const result = {
+      status: "success",
+      creator: "Animasu API",
+      source: "Animasu",
+      title: title,
+      streams: streams,
+      downloads: downloads
+    };
+    setCache(cacheKey, result);
+    return result;
   } catch (error) {
     console.log("🚀 ~ animeEpisode ~ error:", error)
     throw new Error('Internal Server Error');
@@ -147,6 +169,10 @@ const animeEpisode = async (slug) => {
 }
 
 const search = async (keyword, page) => {
+  const cacheKey = `search_${keyword}_${page}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/page/${page}/?s=${keyword}`);
     const body = await res.text();
@@ -159,6 +185,7 @@ const search = async (keyword, page) => {
     data.anime = getCards($);
     data.paginationCount = getPaginationCount($);
 
+    setCache(cacheKey, data);
     return data;
   } catch (error) {
     console.log("🚀 ~ search ~ error:", error)
@@ -167,6 +194,10 @@ const search = async (keyword, page) => {
 }
 
 const genre = async (slug, page) => {
+  const cacheKey = `genre_${slug}_${page}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/genre/${slug}/page/${page}`);
     const body = await res.text();
@@ -178,7 +209,8 @@ const genre = async (slug, page) => {
   
     data.anime = getCards($);
     data.paginationCount = getPaginationCount($);
-  
+
+    setCache(cacheKey, data);
     return data;
   } catch (error) {
     console.log("🚀 ~ genre ~ error:", error)
@@ -187,6 +219,10 @@ const genre = async (slug, page) => {
 }
 
 const characterType = async (slug, page) => {
+  const cacheKey = `character_${slug}_${page}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/karakter/${slug}/page/${page}`);
     const body = await res.text();
@@ -198,7 +234,8 @@ const characterType = async (slug, page) => {
   
     data.anime = getCards($);
     data.paginationCount = getPaginationCount($);
-  
+
+    setCache(cacheKey, data);
     return data;
   } catch (error) {
     console.log("🚀 ~ characterType ~ error:", error)
@@ -207,6 +244,10 @@ const characterType = async (slug, page) => {
 }
 
 const movies = async (page) => {
+  const cacheKey = `movies_${page}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/movie/?halaman=${page}`);
     const body = await res.text();
@@ -219,6 +260,7 @@ const movies = async (page) => {
     data.anime = getCards($);
     data.pagination = getPaginationButton($);
 
+    setCache(cacheKey, data);
     return data;
   } catch (error) {
     throw new Error('Internal Server Error');
@@ -226,6 +268,10 @@ const movies = async (page) => {
 };
 
 const filterList = async (query, page) => {
+  const cacheKey = `filter_${query}_${page}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`${url.BASE_URL}/pencarian/?halaman=${page}&${query}`);
     const body = await res.text();
@@ -238,6 +284,7 @@ const filterList = async (query, page) => {
     data.anime = getCards($);
     data.pagination = getPaginationButton($);
 
+    setCache(cacheKey, data);
     return data;
   } catch (error) {
     console.log("🚀 ~ filterList ~ error:", error)
